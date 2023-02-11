@@ -16,12 +16,14 @@ use modmore\Commerce\Admin\Widgets\Form\Validation\Required;
 use modmore\Commerce\Gateways\Exceptions\TransactionException;
 use modmore\Commerce\Gateways\Helpers\GatewayHelper;
 use modmore\Commerce\Gateways\Interfaces\GatewayInterface;
+use modmore\Commerce\Gateways\Interfaces\SharedWebhookGatewayInterface;
+use modmore\Commerce\Gateways\Interfaces\WebhookGatewayInterface;
 use Payrexx\Models\Request\PaymentProvider;
 use Payrexx\Models\Request\SignatureCheck;
 use Payrexx\Payrexx;
 use Payrexx\PayrexxException;
 
-class Gateway implements GatewayInterface
+class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhookGatewayInterface
 {
     private Commerce $commerce;
     private comPaymentMethod $method;
@@ -237,6 +239,14 @@ class Gateway implements GatewayInterface
             'description' => '✔ Successfully connected',
         ]);
 
+        if ($method->get('id') > 0) {
+            $fields[] = new TextField($this->commerce, [
+                'label' => 'Webhook',
+                'description' => 'Using the webhook is recommended <b>on Commerce 1.3+</b> to ensure payment status updates are pushed to Commerce regardless of the customers\' return to the checkout.<br><br>Based on your current configuration, the field above contains the webhook URL you would need to configure in the Payrexx dashboard, under Integrations > Webhooks.<br><br>When adding the webhook, enable only <code>Transaction</code> events end set the Webhook Type to <code>Normal (PHP-Post)</code>. Use the latest Webhook Version unless otherwise instructed. Note that the <code>Send Test Data</code> button will return a 400 error with response <em>Unable to identify transaction</em>; that is expected.',
+                'value' => GatewayHelper::getSharedNotifyURL($method),
+            ]);
+        }
+
         try {
             /** @var \Payrexx\Models\Response\PaymentProvider $response */
             $paymentProviders = $client->getAll(new PaymentProvider());
@@ -320,5 +330,35 @@ class Gateway implements GatewayInterface
             }
         }
         $payment->setBasket($basket);
+    }
+
+    public function identifyWebhookTransaction()
+    {
+        $postedTransaction = !empty($_POST['transaction']) ? $_POST['transaction'] : [];
+        if (empty($postedTransaction) || !is_array($postedTransaction)) {
+            return false;
+        }
+
+        $ref = $postedTransaction['referenceId'] ?? '';
+        if (empty($ref) || strpos($ref, '/') === false) {
+            return false;
+        }
+
+        $refBits = explode('/', $ref);
+        $transId = (int)trim(end($refBits));
+        $transaction = $this->adapter->getObject(comTransaction::class, [
+            'id' => $transId,
+            'method' => $this->method->get('id'),
+        ]);
+        if ($transaction instanceof comTransaction) {
+            return $transaction;
+        }
+
+        return false;
+    }
+
+    public function webhook(comTransaction $transaction, array $data): Transaction
+    {
+        return $this->returned($transaction, $data);
     }
 }

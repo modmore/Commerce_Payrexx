@@ -5,8 +5,9 @@ namespace modmore\Commerce_Payrexx\Gateways;
 
 use modmore\Commerce\Gateways\Interfaces\RedirectTransactionInterface;
 use modmore\Commerce\Gateways\Interfaces\TransactionInterface;
+use modmore\Commerce\Gateways\Interfaces\WebhookTransactionInterface;
 
-class Transaction implements TransactionInterface, RedirectTransactionInterface
+class Transaction implements TransactionInterface, RedirectTransactionInterface, WebhookTransactionInterface
 {
 
     private \Payrexx\Models\Response\Gateway $response;
@@ -104,5 +105,15 @@ class Transaction implements TransactionInterface, RedirectTransactionInterface
     public function getRedirectData(): array
     {
         return [];
+    }
+
+    public function getWebhookResponse(): string
+    {
+        return 'OK';
+    }
+
+    public function getWebhookResponseCode(): int
+    {
+        return 200;
     }
 }
