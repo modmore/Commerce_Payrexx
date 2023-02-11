@@ -1,0 +1,16 @@
+{
+  "require": {
+    "php": ">=7.4.0",
+    "payrexx/payrexx": "^1.8"
+  },
+  "config": {
+    "platform": {
+      "php": "7.4.0"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "modmore\\Commerce_Payrexx\\": "src/"
+    }
+  }
+}
