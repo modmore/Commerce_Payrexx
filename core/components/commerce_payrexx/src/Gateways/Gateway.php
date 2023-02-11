@@ -1,6 +1,5 @@
 <?php
 
-
 namespace modmore\Commerce_Payrexx\Gateways;
 
 use Commerce;
@@ -223,7 +222,6 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         $client = new Payrexx($instance, $apiKey);
 
         try {
-            /** @var \Payrexx\Models\Response\SignatureCheck $response */
             $client->getOne(new SignatureCheck());
         } catch (Exception $e) {
             $fields[] = new DescriptionField($this->commerce, [
@@ -248,7 +246,7 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         }
 
         try {
-            /** @var \Payrexx\Models\Response\PaymentProvider $response */
+            /** @var \Payrexx\Models\Response\PaymentProvider $paymentProviders */
             $paymentProviders = $client->getAll(new PaymentProvider());
         } catch (Exception $e) {
             $fields[] = new DescriptionField($this->commerce, [

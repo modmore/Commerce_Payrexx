@@ -1,6 +1,5 @@
 <?php
 
-
 namespace modmore\Commerce_Payrexx\Gateways;
 
 use modmore\Commerce\Gateways\Interfaces\RedirectTransactionInterface;
@@ -9,7 +8,6 @@ use modmore\Commerce\Gateways\Interfaces\WebhookTransactionInterface;
 
 class Transaction implements TransactionInterface, RedirectTransactionInterface, WebhookTransactionInterface
 {
-
     private \Payrexx\Models\Response\Gateway $response;
 
     public function __construct(\Payrexx\Models\Response\Gateway $response)

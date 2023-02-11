@@ -1,4 +1,5 @@
 <?php
+
 namespace modmore\Commerce_Payrexx\Modules;
 
 use modmore\Commerce\Admin\Configuration\About\ComposerPackages;
@@ -10,8 +11,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 
-class Payrexx extends BaseModule {
-
+class Payrexx extends BaseModule
+{
     public function getName()
     {
         $this->adapter->loadLexicon('commerce_payrexx:default');
