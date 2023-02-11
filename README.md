@@ -11,7 +11,7 @@ _Special thanks to Visions for commission this payment gateway._
 
 - MODX 2.8+
 - Commerce 1.2+
-- PHP 7.4+
+- PHP 8.0+
 - An active Payrexx account.  If you do not yet have a Payrexx account, please [use our partner link to signup](). That gives us a referral fee at no cost to you, which will help us maintain and support the intregation.
 
 ## Usage
