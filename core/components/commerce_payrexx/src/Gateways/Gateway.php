@@ -192,7 +192,7 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         $fields[] = new TextField($this->commerce, [
             'name' => 'properties[instance]',
             'label' => 'Instance',
-            'description' => 'The instance is your Payrexx subdomain.',
+            'description' => 'The instance is your Payrexx subdomain (without payrexx.com - just the subdomain portion).',
             'value' => $method->getProperty('instance', ''),
             'validation' => [
                 new Required(),
