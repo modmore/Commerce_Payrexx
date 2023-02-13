@@ -292,8 +292,8 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
             // the total of the basket. That means they may charge a different amount then we do
             // if the calculation is different due to taxes or quantities.
             $basket[] = [
-                'name' => [$item->get('quantity') . 'x ' . $item->getName()],
-                'description' => [$item->getDescription()],
+                'name' => [$item->get('quantity') . 'x ' . $item->get('name')],
+                'description' => [$item->get('description')],
                 'quantity' => 1,
                 'amount' => $item->get('total'),
             ];
