@@ -22,7 +22,7 @@ class Transaction implements TransactionInterface, RedirectTransactionInterface,
 
     public function isAwaitingConfirmation(): bool
     {
-        return false;
+        return $this->response->getStatus() === \Payrexx\Models\Response\Transaction::WAITING;
     }
 
     public function isFailed(): bool
