@@ -62,8 +62,7 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
 
         $payment->setSku($order->setReference());
 //        $payment->setPurpose([$order->get('reference')]);
-        // @todo It looks like we may need to use the reference id for webhooks later, to match the
-        // Transaction on Payrex's side to the transaction inside Commerce.
+        // Note we split the reference by / in the webhook handling to get the transaction ID
         $payment->setReferenceId($order->get('reference') . ' / ' . $transaction->get('id'));
 
         $payment->setSuccessRedirectUrl(GatewayHelper::getReturnUrl($transaction));
@@ -115,6 +114,8 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
     3 => 'Benutzerdefiniertes Feld (FR)',
     4 => 'Benutzerdefiniertes Feld (IT)',
  */
+        $this->adapter->loadLexicon('de:commerce:default', 'en:commerce:default', 'fr:commerce:default','it:commerce:default');
+
         // Store some custom info
         $payment->addField('custom_field_1', $order->get('reference'), [
             1 => 'Commerce ' . $this->adapter->lexicon('commerce.reference', [], 'de'),
