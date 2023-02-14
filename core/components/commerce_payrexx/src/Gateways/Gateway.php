@@ -10,6 +10,7 @@ use Exception;
 use modmore\Commerce\Adapter\AdapterInterface;
 use modmore\Commerce\Admin\Widgets\Form\DescriptionField;
 use modmore\Commerce\Admin\Widgets\Form\PasswordField;
+use modmore\Commerce\Admin\Widgets\Form\SelectField;
 use modmore\Commerce\Admin\Widgets\Form\TextField;
 use modmore\Commerce\Admin\Widgets\Form\Validation\Required;
 use modmore\Commerce\Gateways\Exceptions\TransactionException;
@@ -17,6 +18,7 @@ use modmore\Commerce\Gateways\Helpers\GatewayHelper;
 use modmore\Commerce\Gateways\Interfaces\GatewayInterface;
 use modmore\Commerce\Gateways\Interfaces\SharedWebhookGatewayInterface;
 use modmore\Commerce\Gateways\Interfaces\WebhookGatewayInterface;
+use Payrexx\Models\Request\Design;
 use Payrexx\Models\Request\PaymentProvider;
 use Payrexx\Models\Request\SignatureCheck;
 use Payrexx\Payrexx;
@@ -69,10 +71,12 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         $payment->setFailedRedirectUrl(GatewayHelper::getReturnUrl($transaction));
         $payment->setCancelRedirectUrl(GatewayHelper::getCancelUrl($transaction));
 
-        // empty array = all available PSPs
-        // @todo pre-select PSP
-        $payment->setPsp([]);
-        //$payment->setPsp(array(4));
+        if ($psp = $this->method->getProperty('psp')) {
+            $payment->setPsp([$psp]);
+        }
+        else {
+            $payment->setPsp([]);
+        }
         //$payment->setPm(['mastercard']);
 
         // Various options related to auth flows, which we don't support for now
@@ -82,8 +86,9 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         // Expiration
         $payment->setValidity(15);
 
-        // @todo allow selecting a profile
-        // $payment->setLookAndFeelProfile('144be481');
+        if ($design = $this->method->getProperty('design')) {
+             $payment->setLookAndFeelProfile($design);
+        }
 
         $this->addBasket($payment, $order);
 
@@ -192,8 +197,8 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
 
         $fields[] = new TextField($this->commerce, [
             'name' => 'properties[instance]',
-            'label' => 'Instance',
-            'description' => 'The instance is your Payrexx subdomain (without payrexx.com - just the subdomain portion).',
+            'label' => $this->adapter->lexicon('commerce_payrexx.instance'),
+            'description' => $this->adapter->lexicon('commerce_payrexx.instance_desc'),
             'value' => $method->getProperty('instance', ''),
             'validation' => [
                 new Required(),
@@ -201,8 +206,8 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         ]);
         $fields[] = new PasswordField($this->commerce, [
             'name' => 'properties[apiKey]',
-            'label' => 'API Key',
-            'description' => 'Add an API Key to your account by logging in to the Payrexx dashboard, and navigating to Integrations > API & Plugins. ',
+            'label' => $this->adapter->lexicon('commerce_payrexx.apikey'),
+            'description' => $this->adapter->lexicon('commerce_payrexx.apikey_desc'),
             'value' => $method->getProperty('apiKey', ''),
             'validation' => [
                 new Required(),
@@ -213,8 +218,8 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         $apiKey = $method->getProperty('apiKey');
         if (empty($instance) || empty($apiKey)) {
             $fields[] = new DescriptionField($this->commerce, [
-                'label' => 'Connection',
-                'description' => 'Enter an instance and API Key, and then save the payment method to check your connection to Payrexx.',
+                'label' => $this->adapter->lexicon('commerce_payrexx.connection'),
+                'description' => $this->adapter->lexicon('commerce_payrexx.connection_desc'),
             ]);
 
             return $fields;
@@ -234,14 +239,14 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         }
 
         $fields[] = new DescriptionField($this->commerce, [
-            'label' => 'Connection',
-            'description' => '✔ Successfully connected',
+            'label' => $this->adapter->lexicon('commerce_payrexx.connection'),
+            'description' => $this->adapter->lexicon('commerce_payrexx.connection_success'),
         ]);
 
         if ($method->get('id') > 0) {
             $fields[] = new TextField($this->commerce, [
-                'label' => 'Webhook',
-                'description' => 'Using the webhook is recommended <b>on Commerce 1.3+</b> to ensure payment status updates are pushed to Commerce regardless of the customers\' return to the checkout.<br><br>Based on your current configuration, the field above contains the webhook URL you would need to configure in the Payrexx dashboard, under Integrations > Webhooks.<br><br>When adding the webhook, enable only <code>Transaction</code> events end set the Webhook Type to <code>Normal (PHP-Post)</code>. Use the latest Webhook Version unless otherwise instructed. Note that the <code>Send Test Data</code> button will return a 400 error with response <em>Unable to identify transaction</em>; that is expected.',
+                'label' => $this->adapter->lexicon('commerce_payrexx.webhook'),
+                'description' => $this->adapter->lexicon('commerce_payrexx.webhook_desc'),
                 'value' => GatewayHelper::getSharedNotifyURL($method),
             ]);
         }
@@ -259,20 +264,62 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         }
 
         $list = [];
+        $selectOptions = [];
         /** @var PaymentProvider $paymentProvider */
         foreach ($paymentProviders as $paymentProvider) {
             $options = implode(', ', $paymentProvider->getActivePaymentMethods());
             if (!empty($options)) {
                 $options = '<br><span class="help">' . $options . '</span>';
             }
+            $selectOptions[] = [
+                'value' => $paymentProvider->getId(),
+                'label' => $paymentProvider->getName(),
+            ];
             $list[] = '<li>' . $paymentProvider->getName() . $options . '</li>';
         }
 
-        $fields[] = new DescriptionField($this->commerce, [
-            'label' => 'Payment providers',
+        $fields[] = new SelectField($this->commerce, [
+            'name' => 'properties[psp]',
+            'label' => $this->adapter->lexicon('commerce.payrexx_psp'),
+            'options' => $selectOptions,
             'description' => '<ul class="c ui bulleted list">' . implode('', $list) . '</ul>',
+            'value' => $method->getProperty('psp', ''),
+            'validation' => [
+                new Required(),
+            ]
         ]);
 
+
+        try {
+            /** @var \Payrexx\Models\Response\Design[] $designs */
+            $designs = $client->getAll(new Design());
+        } catch (Exception $e) {
+            $fields[] = new DescriptionField($this->commerce, [
+                'label' => get_class($e),
+                'description' => $e->getMessage(),
+            ]);
+
+            return $fields;
+        }
+        $designOptions = [];
+        foreach ($designs as $design) {
+            $default = $design->isDefault() ? ' ' . $this->adapter->lexicon('commerce_payrexx.default') : '';
+            $designOptions[] = [
+                'value' => $design->getUuid(),
+                'label' => $design->getName() . $default,
+            ];
+        }
+
+        $fields[] = new SelectField($this->commerce, [
+            'name' => 'properties[design]',
+            'label' => $this->adapter->lexicon('commerce_payrexx.design'),
+            'description' => $this->adapter->lexicon('commerce_payrexx.design_desc'),
+            'options' => $designOptions,
+            'value' => $method->getProperty('design', ''),
+            'validation' => [
+                new Required(),
+            ]
+        ]);
 
         return $fields;
     }

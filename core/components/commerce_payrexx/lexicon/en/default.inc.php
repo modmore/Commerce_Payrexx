@@ -2,15 +2,27 @@
 
 $_lang['commerce_payrexx'] = 'Payrexx Gateway';
 $_lang['commerce_payrexx.description'] = 'Adds the Payrexx payment provider to Commerce. After enabling the module, you can configure the gateway under Configuration > Payment Methods.';
+$_lang['commerce_payrexx.design'] = 'Design (look & feel)';
+$_lang['commerce_payrexx.design_desc'] = 'The design to use in the hosted payment page. Different designs can be created in the Payrexx dashboard under Configuration > Look & Feel.';
+$_lang['commerce_payrexx.default'] = '(default)';
+$_lang['commerce_payrexx.instance'] = 'Instance';
+$_lang['commerce_payrexx.instance_desc'] = 'The instance is your Payrexx subdomain (without payrexx.com - just the subdomain portion).';
+$_lang['commerce_payrexx.apikey'] = 'API Key';
+$_lang['commerce_payrexx.apikey_desc'] = 'Add an API Key to your account by logging in to the Payrexx dashboard, and navigating to Integrations > API & Plugins.';
+$_lang['commerce_payrexx.connection'] = 'Connection';
+$_lang['commerce_payrexx.connection_desc'] = 'Enter an instance and API Key, and then save the payment method to check your connection to Payrexx.';
+$_lang['commerce_payrexx.connection_success'] = '✔ Successfully connected';
+$_lang['commerce_payrexx.webhook'] = 'Webhook';
+$_lang['commerce_payrexx.webhook_desc'] = 'Using the webhook is recommended <b>on Commerce 1.3+</b> to ensure payment status updates are pushed to Commerce regardless of the customers\' return to the checkout. On older versions, enabling the webhook may result in double processing.<br><br>Based on your current configuration, the field above contains the webhook URL you would need to configure in the Payrexx dashboard, under Integrations > Webhooks.<br><br>When adding the webhook, enable only <code>Transaction</code> events end set the Webhook Type to <code>Normal (PHP-Post)</code>. Use the latest Webhook Version unless otherwise instructed. Note that the <code>Send Test Data</code> button will return a 400 error with response <em>Unable to identify transaction</em>; that is expected.';
 
-$_lang['commerce.payrexx_psp'] = 'Payment Provider(s)';
+$_lang['commerce.payrexx_psp'] = 'Payment Provider';
 $_lang['commerce.payrexx_pm'] = 'Payment Method(s)';
-$_lang['commerce.payrexx_transaction_0'] = 'Transaction 1';
-$_lang['commerce.payrexx_transaction_0_psp'] = 'Transaction 1: PSP';
-$_lang['commerce.payrexx_transaction_0_amount'] = 'Transaction 1: Amount';
-$_lang['commerce.payrexx_transaction_0_fee'] = 'Transaction 1: Payrexx Fee';
-$_lang['commerce.payrexx_transaction_0_brand'] = 'Transaction 1: Brand';
-$_lang['commerce.payrexx_transaction_0_status'] = 'Transaction 1: Status';
+$_lang['commerce.payrexx_transaction_0'] = 'Transaction';
+$_lang['commerce.payrexx_transaction_0_psp'] = 'Transaction: PSP';
+$_lang['commerce.payrexx_transaction_0_amount'] = 'Transaction: Amount';
+$_lang['commerce.payrexx_transaction_0_fee'] = 'Transaction: Payrexx Fee';
+$_lang['commerce.payrexx_transaction_0_brand'] = 'Transaction: Brand';
+$_lang['commerce.payrexx_transaction_0_status'] = 'Transaction: Status';
 $_lang['commerce.payrexx_transaction_1'] = 'Transaction 2';
 $_lang['commerce.payrexx_transaction_1_psp'] = 'Transaction 2: PSP';
 $_lang['commerce.payrexx_transaction_1_amount'] = 'Transaction 2: Amount';
