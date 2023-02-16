@@ -8,6 +8,7 @@ use comPaymentMethod;
 use comTransaction;
 use Exception;
 use modmore\Commerce\Adapter\AdapterInterface;
+use modmore\Commerce\Admin\Widgets\Form\CheckboxField;
 use modmore\Commerce\Admin\Widgets\Form\DescriptionField;
 use modmore\Commerce\Admin\Widgets\Form\PasswordField;
 use modmore\Commerce\Admin\Widgets\Form\SelectField;
@@ -15,6 +16,7 @@ use modmore\Commerce\Admin\Widgets\Form\TextField;
 use modmore\Commerce\Admin\Widgets\Form\Validation\Required;
 use modmore\Commerce\Gateways\Exceptions\TransactionException;
 use modmore\Commerce\Gateways\Helpers\GatewayHelper;
+use modmore\Commerce\Gateways\Interfaces\ConditionallyAvailableGatewayInterface;
 use modmore\Commerce\Gateways\Interfaces\GatewayInterface;
 use modmore\Commerce\Gateways\Interfaces\SharedWebhookGatewayInterface;
 use modmore\Commerce\Gateways\Interfaces\WebhookGatewayInterface;
@@ -25,7 +27,7 @@ use Payrexx\Models\Request\SignatureCheck;
 use Payrexx\Payrexx;
 use Payrexx\PayrexxException;
 
-class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhookGatewayInterface
+class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhookGatewayInterface, ConditionallyAvailableGatewayInterface
 {
     private Commerce $commerce;
     private comPaymentMethod $method;
@@ -319,6 +321,12 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
 //                new Required(),
             ]
         ]);
+        $fields[] = new CheckboxField($this->commerce, [
+            'name' => 'properties[restrict_to_instance]',
+            'label' => $this->adapter->lexicon('commerce_payrexx.restrict_to_instance'),
+            'description' => $this->adapter->lexicon('commerce_payrexx.restrict_to_instance_desc'),
+            'value' => (bool)$method->getProperty('restrict_to_instance', false),
+        ]);
 
         return $fields;
     }
@@ -426,5 +434,16 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
         }
 
         return $client;
+    }
+
+    public function isAvailableFor(\comOrder $order): bool
+    {
+        if ($this->method->getProperty('restrict_to_instance')) {
+            $field = $order->getOrderField('payrexx_instance');
+            if (!$field || $field->getStoredValue() !== $this->method->getProperty('instance')) {
+                return false;
+            }
+        }
+        return true;
     }
 }

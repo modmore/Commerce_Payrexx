@@ -16,7 +16,10 @@ $_lang['commerce_payrexx.connection_desc'] = 'Enter an instance and API Key, and
 $_lang['commerce_payrexx.connection_success'] = '✔ Successfully connected';
 $_lang['commerce_payrexx.webhook'] = 'Webhook';
 $_lang['commerce_payrexx.webhook_desc'] = 'Using the webhook is recommended <b>on Commerce 1.3+</b> to ensure payment status updates are pushed to Commerce regardless of the customers\' return to the checkout. On older versions, enabling the webhook may result in double processing.<br><br>Based on your current configuration, the field above contains the webhook URL you would need to configure in the Payrexx dashboard, under Integrations > Webhooks.<br><br>When adding the webhook, enable only <code>Transaction</code> events end set the Webhook Type to <code>Normal (PHP-Post)</code>. Use the latest Webhook Version unless otherwise instructed. Note that the <code>Send Test Data</code> button will return a 400 error with response <em>Unable to identify transaction</em>; that is expected.';
+$_lang['commerce_payrexx.restrict_to_instance'] = 'Restrict to instance';
+$_lang['commerce_payrexx.restrict_to_instance_desc'] = 'When enabled, you must add an <a href="https://docs.modmore.com/en/Commerce/v1/Orders/Custom_Fields.html" target="_blank" rel="noopener">Order Field</a> to each order with name <code>payrexx_instance</code>. The value of the order field must match the Instance configured on the payment method. If the field is not set, or if the value does not match, this payment method will not be available in the checkout. You can use this when implementing with the Payrexx Platform; configure one payment method for each merchant and provide the instance when creating the order to determine the payment account.';
 
+$_lang['commerce.payrexx_instance'] = 'Payrexx Platform Instance';
 $_lang['commerce.payrexx_psp'] = 'Payment Provider';
 $_lang['commerce.payrexx_pm'] = 'Payment Method(s)';
 $_lang['commerce.payrexx_transaction_0'] = 'Transaction';
