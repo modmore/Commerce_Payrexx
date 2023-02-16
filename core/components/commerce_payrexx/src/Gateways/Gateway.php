@@ -18,6 +18,7 @@ use modmore\Commerce\Gateways\Helpers\GatewayHelper;
 use modmore\Commerce\Gateways\Interfaces\GatewayInterface;
 use modmore\Commerce\Gateways\Interfaces\SharedWebhookGatewayInterface;
 use modmore\Commerce\Gateways\Interfaces\WebhookGatewayInterface;
+use Payrexx\Communicator;
 use Payrexx\Models\Request\Design;
 use Payrexx\Models\Request\PaymentProvider;
 use Payrexx\Models\Request\SignatureCheck;
@@ -49,12 +50,7 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
             throw new TransactionException('No order provided.');
         }
 
-        $instance = $this->method->getProperty('instance');
-        $apiKey = $this->method->getProperty('apiKey');
-        if (empty($instance) || empty($apiKey)) {
-            throw new TransactionException('Missing required credentials to create transaction.');
-        }
-        $client = new Payrexx($instance, $apiKey);
+        $client = $this->getPayrexx();
 
         $payment = new \Payrexx\Models\Request\Gateway();
         $payment->setAmount($transaction->get('amount')); // gateway expects cents
@@ -170,13 +166,7 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
             throw new TransactionException('No transaction reference found.');
         }
 
-        $instance = $this->method->getProperty('instance');
-        $apiKey = $this->method->getProperty('apiKey');
-        if (empty($instance) || empty($apiKey)) {
-            throw new TransactionException('Missing required credentials to create transaction.');
-        }
-        $client = new Payrexx($instance, $apiKey);
-
+        $client = $this->getPayrexx();
         $payment = new \Payrexx\Models\Request\Gateway();
         $payment->setId($ref);
 
@@ -194,7 +184,16 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
     {
         $fields = [];
 
-
+        $apiBase = $method->getProperty('apiBase', Communicator::API_URL_BASE_DOMAIN);
+        $fields[] = new TextField($this->commerce, [
+            'name' => 'properties[apiBase]',
+            'label' => $this->adapter->lexicon('commerce_payrexx.apibase'),
+            'description' => $this->adapter->lexicon('commerce_payrexx.apibase_desc'),
+            'value' => $apiBase,
+            'validation' => [
+                new Required(),
+            ]
+        ]);
         $fields[] = new TextField($this->commerce, [
             'name' => 'properties[instance]',
             'label' => $this->adapter->lexicon('commerce_payrexx.instance'),
@@ -225,7 +224,7 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
             return $fields;
         }
 
-        $client = new Payrexx($instance, $apiKey);
+        $client = new Payrexx($instance, $apiKey, Communicator::DEFAULT_COMMUNICATION_HANDLER, $apiBase);
 
         try {
             $client->getOne(new SignatureCheck());
@@ -317,7 +316,7 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
             'options' => $designOptions,
             'value' => $method->getProperty('design', ''),
             'validation' => [
-                new Required(),
+//                new Required(),
             ]
         ]);
 
@@ -406,5 +405,26 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
     public function webhook(comTransaction $transaction, array $data): Transaction
     {
         return $this->returned($transaction, $data);
+    }
+
+    /**
+     * @return Payrexx
+     */
+    private function getPayrexx(): Payrexx
+    {
+        $instance = $this->method->getProperty('instance');
+        $apiKey = $this->method->getProperty('apiKey');
+        $apiBase = $this->method->getProperty('apiBase', Communicator::API_URL_BASE_DOMAIN);
+        if (empty($instance) || empty($apiKey) || empty($apiBase)) {
+            throw new TransactionException('Missing required credentials to create transaction.');
+        }
+
+        try {
+            $client = new Payrexx($instance, $apiKey, Communicator::DEFAULT_COMMUNICATION_HANDLER, $apiBase);
+        } catch (PayrexxException $e) {
+            throw new TransactionException(get_class($e) . ':' . $e->getMessage());
+        }
+
+        return $client;
     }
 }
