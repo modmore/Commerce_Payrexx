@@ -1,5 +1,5 @@
-Payrexx for Commerce 1.0.0-rc1
-------------------------------
-Released on 2023-02-13
+Payrexx for Commerce 1.0.0-pl
+-----------------------------
+Released on 2023-03-15
 
-- First release
+- First public release

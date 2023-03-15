@@ -8,3 +8,5 @@ applicable to users from across Europe.
 The integration enables plug & play use of Payrexx as a Redirect integration. This means
 the customer will choose the Payrexx option during the Commerce checkout, and be sent to
 the Payrexx hosted payment page to complete. After paying, they'll return to Commerce.
+
+Documentation: https://docs.modmore.com/en/Commerce/v1/Payment_Methods/Payrexx.html
