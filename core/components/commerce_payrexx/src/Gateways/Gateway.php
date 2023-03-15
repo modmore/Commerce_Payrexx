@@ -71,8 +71,7 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
 
         if ($psp = $this->method->getProperty('psp')) {
             $payment->setPsp([$psp]);
-        }
-        else {
+        } else {
             $payment->setPsp([]);
         }
         //$payment->setPm(['mastercard']);
@@ -117,7 +116,7 @@ class Gateway implements GatewayInterface, WebhookGatewayInterface, SharedWebhoo
     3 => 'Benutzerdefiniertes Feld (FR)',
     4 => 'Benutzerdefiniertes Feld (IT)',
  */
-        $this->adapter->loadLexicon('de:commerce:default', 'en:commerce:default', 'fr:commerce:default','it:commerce:default');
+        $this->adapter->loadLexicon('de:commerce:default', 'en:commerce:default', 'fr:commerce:default', 'it:commerce:default');
 
         // Store some custom info
         $payment->addField('custom_field_1', $order->get('reference'), [
